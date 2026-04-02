@@ -12,11 +12,19 @@ export default function AdminEditor() {
   const [publishProgress, setPublishProgress] = useState({ current: 0, total: 0 });
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishDone, setPublishDone] = useState(false);
+  const [debugToken, setDebugToken] = useState<string | null>(null);
 
   const refreshIframeWithChanges = useCallback(async (changes: PendingChange[]) => {
-    if (!iframeRef.current) return;
+    console.log('[AdminEditor] refreshIframeWithChanges called, iframeRef.current:', !!iframeRef.current, 'changes:', changes.length);
+    if (!iframeRef.current) {
+      console.warn('[AdminEditor] iframeRef.current is null — iframe not attached');
+      return;
+    }
     if (changes.length === 0) {
-      iframeRef.current.src = '/preview-bridge';
+      const src = '/preview-bridge';
+      console.log('[AdminEditor] No changes, resetting iframe src to:', src);
+      iframeRef.current.src = src;
+      setDebugToken(null);
       return;
     }
     try {
@@ -25,17 +33,28 @@ export default function AdminEditor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ changes }),
       });
-      if (!res.ok) return;
+      console.log('[AdminEditor] POST /api/preview response status:', res.status);
+      if (!res.ok) {
+        console.error('[AdminEditor] Preview API returned error:', res.status);
+        return;
+      }
       const { token } = await res.json();
-      iframeRef.current.src = `/preview-bridge?token=${token}`;
-    } catch {
-      // Silently fail — preview is best-effort
+      const newSrc = `/preview-bridge?token=${token}`;
+      console.log('[AdminEditor] Got token:', token);
+      console.log('[AdminEditor] Setting iframe src to:', newSrc);
+      iframeRef.current.src = newSrc;
+      setDebugToken(token);
+      console.log('[AdminEditor] iframe src after set:', iframeRef.current.src);
+    } catch (err) {
+      console.error('[AdminEditor] Preview fetch error:', err);
     }
   }, []);
 
   const handlePreview = useCallback(
     (change: PendingChange) => {
+      console.log('[AdminEditor] handlePreview called with change:', change);
       const next = [...previewedChanges, change];
+      console.log('[AdminEditor] Total previewed changes:', next.length);
       setPreviewedChanges(next);
       refreshIframeWithChanges(next);
     },
@@ -115,6 +134,13 @@ export default function AdminEditor() {
         </span>
 
         <div className="flex items-center gap-3">
+          {/* Debug token indicator */}
+          {debugToken && (
+            <span className="font-mono text-[10px] text-amber-400/80 bg-amber-400/10 px-2 py-0.5 rounded">
+              preview:{debugToken.slice(0, 8)}
+            </span>
+          )}
+
           {/* Publish button */}
           <button
             onClick={handlePublish}
