@@ -1,16 +1,18 @@
+import { kv } from '@vercel/kv';
 import type { PendingChange } from './types';
 
-const store = new Map<string, PendingChange[]>();
+const EXPIRY_SECONDS = 30 * 60; // 30 minutes
 
-export function setPreview(token: string, changes: PendingChange[]) {
-  store.set(token, changes);
-  setTimeout(() => store.delete(token), 30 * 60 * 1000);
+export async function setPreview(token: string, changes: PendingChange[]) {
+  await kv.set(`preview:${token}`, JSON.stringify(changes), { ex: EXPIRY_SECONDS });
 }
 
-export function getPreview(token: string): PendingChange[] | null {
-  return store.get(token) ?? null;
+export async function getPreview(token: string): Promise<PendingChange[] | null> {
+  const data = await kv.get<string>(`preview:${token}`);
+  if (!data) return null;
+  return typeof data === 'string' ? JSON.parse(data) : data;
 }
 
-export function clearPreview(token: string) {
-  store.delete(token);
+export async function clearPreview(token: string) {
+  await kv.del(`preview:${token}`);
 }

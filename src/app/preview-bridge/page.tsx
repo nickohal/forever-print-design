@@ -26,9 +26,7 @@ export default async function PreviewBridge({
 }) {
   const params = await searchParams;
   const token = params.token;
-  const changes = token ? getPreview(token) ?? [] : [];
-  const tokenLookupFailed = !!token && changes.length === 0;
-  console.log('[preview-bridge] token:', token, 'changes:', changes.length, 'lookupFailed:', tokenLookupFailed);
+  const changes = token ? (await getPreview(token)) ?? [] : [];
 
   // Compute text overrides
   const heroFile = 'src/components/Hero.tsx';
@@ -52,7 +50,7 @@ export default async function PreviewBridge({
   const componentChanges = getComponentChanges(changes);
 
   return (
-    <main className={`max-w-[1440px] mx-auto w-full${tokenLookupFailed ? ' ring-4 ring-red-500 ring-inset' : ''}`}>
+    <main className="max-w-[1440px] mx-auto w-full">
       {cssOverrides && (
         <style dangerouslySetInnerHTML={{ __html: cssOverrides }} />
       )}

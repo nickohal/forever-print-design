@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }));
 
     const token = crypto.randomUUID();
-    setPreview(token, enriched);
+    await setPreview(token, enriched);
 
     return Response.json({ token });
   } catch (err) {
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: 'token is required' }, { status: 400 });
   }
 
-  const changes = getPreview(token);
+  const changes = await getPreview(token);
   if (!changes) {
     return Response.json({ error: 'Preview not found or expired' }, { status: 404 });
   }
