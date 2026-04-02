@@ -3,6 +3,18 @@ import { useState } from 'react';
 
 type Phase = 'idle' | 'loading' | 'diff' | 'deploying' | 'deployed';
 
+interface Suggestion {
+  file: string;
+  oldCode: string;
+  newCode: string;
+  description: string;
+}
+
+interface Props {
+  mode?: 'demo' | 'live';
+  onDeployed?: () => void;
+}
+
 const chips = [
   "Make the headline more romantic",
   "Change button color to dusty blue",
@@ -24,31 +36,109 @@ const LoadingDots = ({ label }: { label: string }) => (
   </div>
 );
 
-export default function AiEditor() {
+export default function AiEditor({ mode = 'demo', onDeployed }: Props) {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
   const [input, setInput] = useState('');
+  const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [commitUrl, setCommitUrl] = useState<string | null>(null);
 
-  const handleApply = () => {
+  const handleApply = async () => {
     setPhase('loading');
-    setTimeout(() => setPhase('diff'), 1500);
+    setError(null);
+
+    if (mode === 'demo') {
+      setTimeout(() => setPhase('diff'), 1500);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? 'Failed to generate suggestion');
+        setPhase('idle');
+        return;
+      }
+      setSuggestion(data as Suggestion);
+      setPhase('diff');
+    } catch {
+      setError('Network error — please try again');
+      setPhase('idle');
+    }
   };
 
-  const handleDeploy = () => {
+  const handleDeploy = async () => {
     setPhase('deploying');
-    setTimeout(() => setPhase('deployed'), 1500);
+    setError(null);
+
+    if (mode === 'demo') {
+      setTimeout(() => setPhase('deployed'), 1500);
+      return;
+    }
+
+    if (!suggestion) {
+      setError('No suggestion to apply');
+      setPhase('idle');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(suggestion),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? 'Failed to apply change');
+        setPhase('diff');
+        return;
+      }
+      setCommitUrl(data.commitUrl ?? null);
+      setPhase('deployed');
+      onDeployed?.();
+    } catch {
+      setError('Network error — please try again');
+      setPhase('diff');
+    }
   };
 
   const handleDiscard = () => {
     setPhase('idle');
     setInput('');
+    setSuggestion(null);
+    setError(null);
+    setCommitUrl(null);
   };
 
   const handleClose = () => {
     setOpen(false);
     setPhase('idle');
     setInput('');
+    setSuggestion(null);
+    setError(null);
+    setCommitUrl(null);
   };
+
+  // Determine the diff text to show
+  const diffOld =
+    mode === 'live' && suggestion
+      ? suggestion.oldCode.slice(0, 120) + (suggestion.oldCode.length > 120 ? '…' : '')
+      : '"Designed for your most cherished moments"';
+
+  const diffNew =
+    mode === 'live' && suggestion
+      ? suggestion.newCode.slice(0, 120) + (suggestion.newCode.length > 120 ? '…' : '')
+      : '"Created for the moments that last forever"';
+
+  const diffFile =
+    mode === 'live' && suggestion ? suggestion.file : null;
 
   return (
     <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-3">
@@ -64,7 +154,7 @@ export default function AiEditor() {
                 AI Site Editor
               </h3>
               <p className="font-sans font-light text-[11px] text-muted mt-0.5">
-                Describe a change in plain text
+                {mode === 'live' ? 'Live — changes go to GitHub' : 'Describe a change in plain text'}
               </p>
             </div>
             <button
@@ -102,6 +192,10 @@ export default function AiEditor() {
                   className="w-full font-sans font-light text-[13px] text-warm-black placeholder:text-muted/35 bg-white border border-muted/20 focus:border-sage focus:outline-none rounded-lg px-3 py-2.5 resize-none transition-colors duration-150"
                 />
 
+                {error && (
+                  <p className="font-sans font-light text-[11px] text-red-500 mt-2">{error}</p>
+                )}
+
                 <div className="flex items-center justify-between mt-3">
                   <p className="font-sans font-light text-[10px] text-muted/50">
                     ↵ Changes preview before going live
@@ -127,14 +221,24 @@ export default function AiEditor() {
                   ✓ Change ready to preview
                 </p>
 
-                <div className="bg-muted/5 border border-muted/10 rounded-lg p-3.5 flex flex-col gap-2.5">
-                  <p className="font-sans font-light text-[12px] text-muted line-through leading-relaxed">
-                    &ldquo;Designed for your most cherished moments&rdquo;
+                {diffFile && (
+                  <p className="font-sans font-light text-[10px] text-muted/60 -mt-1">
+                    {diffFile}
                   </p>
-                  <p className="font-sans font-light text-[12px] text-sage leading-relaxed">
-                    &ldquo;Created for the moments that last forever&rdquo;
+                )}
+
+                <div className="bg-muted/5 border border-muted/10 rounded-lg p-3.5 flex flex-col gap-2.5">
+                  <p className="font-sans font-light text-[12px] text-muted line-through leading-relaxed break-words">
+                    {diffOld}
+                  </p>
+                  <p className="font-sans font-light text-[12px] text-sage leading-relaxed break-words">
+                    {diffNew}
                   </p>
                 </div>
+
+                {error && (
+                  <p className="font-sans font-light text-[11px] text-red-500">{error}</p>
+                )}
 
                 <div className="flex gap-2 pt-1">
                   <button
@@ -174,6 +278,17 @@ export default function AiEditor() {
                     Deploying via Vercel
                   </span>
                 </div>
+
+                {commitUrl && (
+                  <a
+                    href={commitUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-sans font-light text-[11px] text-muted/60 hover:text-sage transition-colors duration-150"
+                  >
+                    View commit on GitHub →
+                  </a>
+                )}
 
                 <button
                   onClick={handleDiscard}
