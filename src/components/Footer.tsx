@@ -1,11 +1,11 @@
 export default function Footer() {
   return (
-    <footer className="bg-cream border-t border-muted/15">
+    <footer className="bg-cream dark:bg-dark-green border-t border-muted/15 dark:border-cream/10 transition-colors duration-300">
       {/* Top row */}
       <div className="px-12 lg:px-20 py-12 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6">
         {/* Left — brand */}
         <div>
-          <p className="font-serif font-light tracking-[0.22em] text-warm-black text-sm uppercase whitespace-nowrap">
+          <p className="font-serif font-light tracking-[0.22em] text-warm-black dark:text-cream text-sm uppercase whitespace-nowrap transition-colors duration-300">
             Forever Print Design
           </p>
         </div>
@@ -16,7 +16,7 @@ export default function Footer() {
             <a
               key={link}
               href="#"
-              className="font-sans font-light text-[11px] uppercase tracking-[0.18em] text-muted hover:text-warm-black transition-colors duration-200"
+              className="font-sans font-light text-[11px] uppercase tracking-[0.18em] text-muted hover:text-warm-black dark:hover:text-cream transition-colors duration-200"
             >
               {link}
             </a>
@@ -27,7 +27,7 @@ export default function Footer() {
         <div className="flex flex-col gap-2 md:items-end">
           <a
             href="mailto:emilie@foreverprintdesign.com"
-            className="font-sans font-light text-[13px] text-muted hover:text-warm-black transition-colors duration-200"
+            className="font-sans font-light text-[13px] text-muted hover:text-warm-black dark:hover:text-cream transition-colors duration-200"
           >
             emilie@foreverprintdesign.com
           </a>
@@ -38,7 +38,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom row */}
-      <div className="border-t border-muted/10 px-12 lg:px-20 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="border-t border-muted/10 dark:border-cream/10 px-12 lg:px-20 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <p className="font-sans font-light text-[11px] text-muted/60">
           © 2024 Forever Print Design. All rights reserved.
         </p>

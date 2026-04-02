@@ -9,13 +9,13 @@ const products = [
 
 export default function FeaturedProducts() {
   return (
-    <section className="border-t border-muted/15 px-12 lg:px-20 py-24 lg:py-32">
+    <section className="border-t border-muted/15 dark:border-cream/10 px-12 lg:px-20 py-24 lg:py-32 transition-colors duration-300">
       {/* Section heading */}
       <div className="mb-14">
         <p className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-4">
           Featured Collection
         </p>
-        <h2 className="font-serif font-light text-warm-black text-4xl md:text-5xl leading-[1.1]">
+        <h2 className="font-serif font-light italic text-warm-black dark:text-cream text-5xl leading-[1.15] transition-colors duration-300">
           Crafted for every occasion
         </h2>
       </div>
@@ -25,8 +25,11 @@ export default function FeaturedProducts() {
         {products.map((product) => (
           <div key={product.id} className="group flex flex-col">
             {/* Image placeholder */}
-            <div className="relative aspect-[3/4] bg-[#F3F0EB] border border-muted/15 mb-4 flex items-center justify-center overflow-hidden">
-              <span className="font-serif font-light text-[11px] tracking-[0.2em] text-muted/60 uppercase">
+            <div className="relative aspect-[3/4] bg-[#F3F0EB] dark:bg-[#1F4B38] border border-muted/15 dark:border-cream/10 mb-4 flex items-center justify-center overflow-hidden transition-colors duration-300">
+              {/* Inner frame */}
+              <div className="absolute inset-3 border border-muted/15 dark:border-cream/10 pointer-events-none" />
+
+              <span className="font-serif font-light text-[11px] tracking-[0.2em] text-muted/60 dark:text-cream/40 uppercase">
                 {product.category}
               </span>
 
@@ -39,7 +42,7 @@ export default function FeaturedProducts() {
             </div>
 
             {/* Card copy */}
-            <h3 className="font-serif font-light text-warm-black text-[18px] leading-snug mb-1">
+            <h3 className="font-serif font-light text-warm-black dark:text-cream text-[18px] leading-snug mb-1 transition-colors duration-300">
               {product.title}
             </h3>
             <p className="font-sans font-light text-[11px] text-muted tracking-wide mb-3">

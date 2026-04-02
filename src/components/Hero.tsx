@@ -16,12 +16,12 @@ export default function Hero() {
         </p>
 
         {/* Headline */}
-        <h1 className="font-serif font-light italic text-warm-black text-5xl md:text-6xl lg:text-[4.25rem] xl:text-7xl leading-[1.08] mb-8 max-w-lg">
+        <h1 className="font-serif font-light italic text-warm-black dark:text-cream text-6xl md:text-7xl lg:text-8xl leading-[1.08] mb-8 max-w-lg transition-colors duration-300">
           Designed for your most cherished moments
         </h1>
 
-        {/* Thin gold rule */}
-        <div className="w-12 h-px bg-gold mb-8" />
+        {/* Sage rule */}
+        <div className="w-12 h-px bg-sage mb-8" />
 
         {/* Body copy */}
         <p className="font-sans font-light text-muted text-[15px] md:text-base leading-[1.8] mb-10 max-w-sm">
@@ -33,13 +33,13 @@ export default function Hero() {
         <div className="flex flex-row gap-3">
           <a
             href="#"
-            className="font-sans font-light text-[11px] uppercase tracking-[0.18em] bg-warm-black text-cream px-5 py-3 md:px-8 md:py-3.5 hover:bg-warm-black/85 transition-colors duration-200 whitespace-nowrap"
+            className="font-sans font-light text-[11px] uppercase tracking-[0.18em] bg-sage text-cream dark:text-warm-black px-5 py-3 md:px-8 md:py-3.5 hover:bg-sage/85 transition-colors duration-200 whitespace-nowrap"
           >
             Shop Collection
           </a>
           <a
             href="#"
-            className="font-sans font-light text-[11px] uppercase tracking-[0.18em] border border-warm-black/30 text-warm-black px-5 py-3 md:px-8 md:py-3.5 hover:border-warm-black/60 transition-colors duration-200 whitespace-nowrap"
+            className="font-sans font-light text-[11px] uppercase tracking-[0.18em] border border-warm-black/30 dark:border-cream/30 text-warm-black dark:text-cream px-5 py-3 md:px-8 md:py-3.5 hover:border-warm-black/60 dark:hover:border-cream/60 transition-colors duration-200 whitespace-nowrap"
           >
             View on Etsy
           </a>
@@ -52,23 +52,26 @@ export default function Hero() {
       </div>
 
       {/* Right — product grid placeholder */}
-      <div className="flex-[2] min-w-0 flex items-center justify-center bg-cream/60 py-16 lg:py-0">
+      <div className="flex-[2] min-w-0 flex items-center justify-center bg-cream/60 dark:bg-[#1E4232] py-16 lg:py-0 transition-colors duration-300">
         <div className="grid grid-cols-2 gap-3 w-full max-w-xs md:max-w-sm lg:max-w-[340px]">
           {placeholders.map(({ label }) => (
             <div
               key={label}
-              className="group aspect-[3/4] border border-muted/15 bg-[#F3F0EB] flex flex-col items-center justify-between p-4 hover:border-gold/30 transition-colors duration-300"
+              className="group relative aspect-[3/4] border border-muted/15 dark:border-cream/10 bg-[#F3F0EB] dark:bg-[#1F4B38] flex flex-col items-center justify-between p-4 hover:border-gold/30 transition-colors duration-300"
             >
+              {/* Inner frame */}
+              <div className="absolute inset-3 border border-muted/20 dark:border-cream/10 pointer-events-none" />
+
               {/* decorative top accent */}
               <div className="w-6 h-px bg-gold/40 group-hover:bg-gold/70 transition-colors duration-300 mt-2" />
 
               {/* center ornament */}
               <div className="flex-1 flex items-center justify-center">
-                <div className="w-10 h-10 border border-muted/10 rounded-full" />
+                <div className="w-10 h-10 border border-muted/10 dark:border-cream/10 rounded-full" />
               </div>
 
               {/* label */}
-              <span className="font-serif font-light text-[11px] tracking-[0.2em] text-muted/80 uppercase mb-1">
+              <span className="font-serif font-light text-[11px] tracking-[0.2em] text-muted/80 dark:text-cream/50 uppercase mb-1">
                 {label}
               </span>
             </div>
