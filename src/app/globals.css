@@ -100,10 +100,10 @@ body {
   background-color: #FDFAF6;
   background-image: repeating-linear-gradient(
     45deg,
-    rgba(0, 0, 0, 0.018) 0px,
-    rgba(0, 0, 0, 0.018) 1px,
-    transparent 1px,
-    transparent 40px
+    rgba(0, 0, 0, 0.08) 0px,
+    rgba(0, 0, 0, 0.08) 2px,
+    transparent 2px,
+    transparent 25px
   );
   color: #1A1917;
   font-family: var(--font-sans), sans-serif;
