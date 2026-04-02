@@ -22,7 +22,7 @@ const pinyonScript = Pinyon_Script({
 });
 
 export const metadata: Metadata = {
-  title: "Forever Print Design",
+  title: "hei dette er en test",
   description: "Premium print design for lasting impressions",
 };
 
