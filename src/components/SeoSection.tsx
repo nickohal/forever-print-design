@@ -14,7 +14,7 @@ export default function SeoSection() {
           <p className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-5">
             Own your presence online
           </p>
-          <h2 className="font-serif font-light text-warm-black dark:text-cream text-[40px] leading-[1.1] mb-6 transition-colors duration-300">
+          <h2 data-preview-id="seo-heading" className="font-serif font-light text-warm-black dark:text-cream text-[40px] leading-[1.1] mb-6 transition-colors duration-300">
             Your brand. Your traffic. Your customers.
           </h2>
           <p className="font-sans font-light text-muted text-[14px] leading-relaxed mb-8 max-w-md">

@@ -11,12 +11,12 @@ export default function Hero() {
       {/* Left — copy */}
       <div className="flex-[3] min-w-0 flex flex-col justify-center py-20 lg:py-0">
         {/* Eyebrow label */}
-        <p className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-7">
+        <p data-preview-id="hero-eyebrow" className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-7">
           Bespoke Digital Stationery
         </p>
 
         {/* Headline */}
-        <h1 className="font-serif font-light italic text-warm-black dark:text-cream text-6xl md:text-7xl lg:text-8xl leading-[1.08] mb-8 max-w-lg transition-colors duration-300">
+        <h1 data-preview-id="hero-headline" className="font-serif font-light italic text-warm-black dark:text-cream text-6xl md:text-7xl lg:text-8xl leading-[1.08] mb-8 max-w-lg transition-colors duration-300">
           Designed for your most cherished moments
         </h1>
 
@@ -24,7 +24,7 @@ export default function Hero() {
         <div className="w-12 h-px bg-sage mb-8" />
 
         {/* Body copy */}
-        <p className="font-sans font-light text-muted text-[15px] md:text-base leading-[1.8] mb-10 max-w-sm">
+        <p data-preview-id="hero-subtext" className="font-sans font-light text-muted text-[15px] md:text-base leading-[1.8] mb-10 max-w-sm">
           Premium printable templates for weddings, celebrations &amp; every
           occasion in between.
         </p>
@@ -35,7 +35,7 @@ export default function Hero() {
             href="#"
             className="font-sans font-light text-[11px] uppercase tracking-[0.18em] bg-sage text-cream dark:text-warm-black px-5 py-3 md:px-8 md:py-3.5 hover:bg-sage/85 transition-colors duration-200 whitespace-nowrap"
           >
-            Shop Collection
+            <span data-preview-id="hero-cta-primary">Shop Collection</span>
           </a>
           <a
             href="#"

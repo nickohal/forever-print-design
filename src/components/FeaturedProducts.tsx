@@ -15,7 +15,7 @@ export default function FeaturedProducts() {
         <p className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-4">
           Featured Collection
         </p>
-        <h2 className="font-serif font-light italic text-warm-black dark:text-cream text-5xl leading-[1.15] transition-colors duration-300">
+        <h2 data-preview-id="featured-heading" className="font-serif font-light italic text-warm-black dark:text-cream text-5xl leading-[1.15] transition-colors duration-300">
           Crafted for every occasion
         </h2>
       </div>

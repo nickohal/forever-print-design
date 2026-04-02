@@ -3,51 +3,44 @@ import { useState, useRef, useEffect } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Role = 'user' | 'assistant';
-
-interface Proposal {
+export interface PendingChange {
   file: string;
   oldCode: string;
   newCode: string;
   description: string;
 }
 
-type DeployState = 'idle' | 'deploying' | 'deployed' | 'error';
+type ProposalState = 'pending' | 'previewed' | 'approved' | 'discarded';
 
-interface ProposalState {
-  proposal: Proposal;
-  deployState: DeployState;
-  commitUrl?: string;
-  error?: string;
-}
-
-interface Message {
-  role: Role;
-  content: string;
-  proposalState?: ProposalState;
-}
+type Message =
+  | { type: 'chat'; role: 'user' | 'assistant'; content: string }
+  | { type: 'proposal'; change: PendingChange; state: ProposalState };
 
 interface Props {
-  mode?: 'demo' | 'live';
-  onDeployed?: () => void;
-  defaultOpen?: boolean;
+  mode: 'demo' | 'live';
+  onPreview: (change: PendingChange) => void;
+  onApprove: (change: PendingChange) => void;
+  onDiscard?: (change: PendingChange) => void;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const STARTER_CHIPS = ['Change the headline', 'Update colours', 'Add a product'];
+const STARTER_CHIPS = ['Endre overskriften', 'Oppdater farger', 'Legg til et produkt', 'Forbedre SEO-teksten'];
 
 function truncate(s: string, n: number) {
   return s.length > n ? s.slice(0, n) + '…' : s;
 }
 
-function extractProposal(text: string): { cleanText: string; proposal: Proposal | null } {
+function extractProposal(text: string): { cleanText: string; proposal: PendingChange | null } {
   const match = text.match(/```json\s*([\s\S]*?)```/);
   if (!match) return { cleanText: text.trim(), proposal: null };
   try {
-    const proposal = JSON.parse(match[1].trim()) as Proposal;
-    const cleanText = text.replace(/```json[\s\S]*?```/, '').trim();
-    return { cleanText, proposal };
+    const parsed = JSON.parse(match[1].trim());
+    if (parsed.file && parsed.oldCode && parsed.newCode && parsed.description) {
+      const cleanText = text.replace(/```json[\s\S]*?```/, '').trim();
+      return { cleanText, proposal: parsed as PendingChange };
+    }
+    return { cleanText: text.trim(), proposal: null };
   } catch {
     return { cleanText: text.trim(), proposal: null };
   }
@@ -56,85 +49,82 @@ function extractProposal(text: string): { cleanText: string; proposal: Proposal 
 // ─── Proposal card ────────────────────────────────────────────────────────────
 
 function ProposalCard({
+  change,
   state,
-  onDeploy,
-  onRefine,
+  onPreview,
+  onApprove,
+  onDiscard,
 }: {
+  change: PendingChange;
   state: ProposalState;
-  onDeploy: () => void;
-  onRefine: () => void;
+  onPreview: () => void;
+  onApprove: () => void;
+  onDiscard: () => void;
 }) {
-  const { proposal, deployState, commitUrl, error } = state;
+  if (state === 'discarded') {
+    return (
+      <div className="w-full bg-muted/5 border border-muted/10 rounded-lg p-3 opacity-50">
+        <p className="font-sans font-light text-[11px] text-muted">Forkastet</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full bg-sage/10 border border-sage/20 rounded-lg p-3.5 flex flex-col gap-2.5">
+    <div className="w-full bg-sage/10 border border-sage/20 rounded-lg p-4 flex flex-col gap-2.5">
       <p className="font-sans font-light text-[9px] uppercase tracking-[0.2em] text-sage">
         ✦ Proposed change
       </p>
+
       <p className="font-mono text-[10px] text-muted bg-muted/10 px-2 py-1 rounded break-all">
-        {proposal.file}
+        {change.file}
       </p>
+
       <div className="flex flex-col gap-1.5">
         <p className="font-sans font-light text-[11px] text-muted line-through leading-relaxed break-words">
-          {truncate(proposal.oldCode, 120)}
+          {truncate(change.oldCode, 120)}
         </p>
         <p className="font-sans font-light text-[11px] text-sage leading-relaxed break-words">
-          {truncate(proposal.newCode, 120)}
+          {truncate(change.newCode, 120)}
         </p>
       </div>
 
-      {deployState === 'idle' && (
+      {state === 'approved' ? (
+        <p className="font-sans font-light text-[11px] text-sage">✓ Klar til publisering</p>
+      ) : (
         <div className="flex gap-2 pt-0.5 flex-wrap">
+          {state !== 'previewed' && (
+            <button
+              onClick={onPreview}
+              className="font-sans font-light text-[11px] text-warm-black border border-muted/25 rounded px-3 py-1.5 hover:border-sage hover:text-sage transition-colors duration-150"
+            >
+              👁 Preview
+            </button>
+          )}
+          {state === 'previewed' && (
+            <span className="font-sans font-light text-[10px] text-sage/70 flex items-center gap-1 px-2 py-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-sage/60" />
+              Forhåndsvisning aktiv
+            </span>
+          )}
           <button
-            onClick={onRefine}
-            className="font-sans font-light text-[11px] text-warm-black border border-muted/25 rounded px-3 py-1.5 hover:border-muted/50 transition-colors duration-150"
-          >
-            Refine this →
-          </button>
-          <button
-            onClick={onDeploy}
+            onClick={onApprove}
             className="font-sans font-light text-[11px] text-white bg-sage rounded px-3 py-1.5 hover:bg-sage/85 transition-colors duration-150"
           >
-            Looks good — deploy ↗
+            ✓ Legg til
+          </button>
+          <button
+            onClick={onDiscard}
+            className="font-sans font-light text-[11px] text-muted/60 hover:text-red-500 transition-colors duration-150 px-2 py-1.5"
+          >
+            ✗ Forkast
           </button>
         </div>
-      )}
-
-      {deployState === 'deploying' && (
-        <div className="flex items-center gap-1.5">
-          <span className="font-sans font-light text-[11px] text-muted">Deploying</span>
-          <span className="inline-flex gap-[3px]">
-            {[0, 150, 300].map((d) => (
-              <span key={d} className="w-1 h-1 rounded-full bg-muted/50 animate-bounce" style={{ animationDelay: `${d}ms` }} />
-            ))}
-          </span>
-        </div>
-      )}
-
-      {deployState === 'deployed' && (
-        <div className="flex flex-col gap-1.5">
-          <p className="font-sans font-light text-[11px] text-sage">✓ Live in ~60 seconds</p>
-          {commitUrl && commitUrl !== '#' && (
-            <a
-              href={commitUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-sans font-light text-[10px] text-muted/60 hover:text-sage transition-colors duration-150"
-            >
-              View commit on GitHub →
-            </a>
-          )}
-        </div>
-      )}
-
-      {deployState === 'error' && (
-        <p className="font-sans font-light text-[11px] text-red-500">{error}</p>
       )}
     </div>
   );
 }
 
-// ─── Loading dots ─────────────────────────────────────────────────────────────
+// ─── Thinking dots ────────────────────────────────────────────────────────────
 
 function ThinkingDots() {
   return (
@@ -151,8 +141,7 @@ function ThinkingDots() {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function AiEditor({ mode = 'demo', onDeployed, defaultOpen = false }: Props) {
-  const [open, setOpen] = useState(defaultOpen);
+export default function AiEditor({ mode, onPreview, onApprove, onDiscard }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -169,10 +158,14 @@ export default function AiEditor({ mode = 'demo', onDeployed, defaultOpen = fals
     e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px';
   };
 
+  // Build the conversation history for the API (chat messages only)
+  const apiHistory = (msgs: Message[]) =>
+    msgs.filter((m): m is Message & { type: 'chat' } => m.type === 'chat').map((m) => ({ role: m.role, content: m.content }));
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
 
-    const userMsg: Message = { role: 'user', content: text };
+    const userMsg: Message = { type: 'chat', role: 'user', content: text };
     const next = [...messages, userMsg];
     setMessages(next);
     setInput('');
@@ -181,7 +174,7 @@ export default function AiEditor({ mode = 'demo', onDeployed, defaultOpen = fals
 
     if (mode === 'demo') {
       setTimeout(() => {
-        const fakeProp: Proposal = {
+        const fakeProposal: PendingChange = {
           file: 'src/components/Hero.tsx',
           oldCode: 'Designed for your most cherished moments',
           newCode: 'Created for the moments that last forever',
@@ -189,11 +182,8 @@ export default function AiEditor({ mode = 'demo', onDeployed, defaultOpen = fals
         };
         setMessages((prev) => [
           ...prev,
-          {
-            role: 'assistant',
-            content: "I can update the headline in the Hero section. Here's what I'd change:",
-            proposalState: { proposal: fakeProp, deployState: 'idle' },
-          },
+          { type: 'chat', role: 'assistant', content: 'Jeg kan oppdatere overskriften i hero-seksjonen. Her er forslaget:' },
+          { type: 'proposal', change: fakeProposal, state: 'pending' },
         ]);
         setLoading(false);
       }, 1500);
@@ -204,219 +194,139 @@ export default function AiEditor({ mode = 'demo', onDeployed, defaultOpen = fals
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: next.map((m) => ({ role: m.role, content: m.content })),
-        }),
+        body: JSON.stringify({ messages: apiHistory(next) }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: `Error: ${data.error ?? 'Something went wrong'}` },
-        ]);
+        setMessages((prev) => [...prev, { type: 'chat', role: 'assistant', content: `Feil: ${data.error ?? 'Noe gikk galt'}` }]);
         setLoading(false);
         return;
       }
       const { cleanText, proposal } = extractProposal(data.reply as string);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: cleanText,
-          proposalState: proposal ? { proposal, deployState: 'idle' } : undefined,
-        },
-      ]);
+      const newMsgs: Message[] = [];
+      if (cleanText) newMsgs.push({ type: 'chat', role: 'assistant', content: cleanText });
+      if (proposal) newMsgs.push({ type: 'proposal', change: proposal, state: 'pending' });
+      setMessages((prev) => [...prev, ...newMsgs]);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: 'Network error — please try again.' },
-      ]);
+      setMessages((prev) => [...prev, { type: 'chat', role: 'assistant', content: 'Nettverksfeil — prøv igjen.' }]);
     }
     setLoading(false);
   };
 
-  const handleDeploy = async (msgIndex: number) => {
-    const msg = messages[msgIndex];
-    if (!msg.proposalState) return;
-
-    const update = (patch: Partial<ProposalState>) =>
-      setMessages((prev) =>
-        prev.map((m, i) =>
-          i === msgIndex ? { ...m, proposalState: { ...m.proposalState!, ...patch } } : m,
-        ),
-      );
-
-    update({ deployState: 'deploying' });
-
-    if (mode === 'demo') {
-      setTimeout(() => {
-        update({ deployState: 'deployed', commitUrl: '#' });
-        onDeployed?.();
-      }, 1500);
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(msg.proposalState.proposal),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        update({ deployState: 'error', error: data.error ?? 'Deploy failed' });
-        return;
-      }
-      update({ deployState: 'deployed', commitUrl: data.commitUrl });
-      onDeployed?.();
-    } catch {
-      update({ deployState: 'error', error: 'Network error — please try again' });
-    }
+  const updateProposal = (index: number, state: ProposalState) => {
+    setMessages((prev) =>
+      prev.map((m, i) => (i === index && m.type === 'proposal' ? { ...m, state } : m)),
+    );
   };
 
-  const handleRefine = () => {
-    setInput("I'd like to refine this: ");
-    setTimeout(() => {
-      inputRef.current?.focus();
-      const len = inputRef.current?.value.length ?? 0;
-      inputRef.current?.setSelectionRange(len, len);
-    }, 0);
+  const handlePreviewClick = (index: number, change: PendingChange) => {
+    updateProposal(index, 'previewed');
+    onPreview(change);
+  };
+
+  const handleApproveClick = (index: number, change: PendingChange) => {
+    updateProposal(index, 'approved');
+    onApprove(change);
+  };
+
+  const handleDiscardClick = (index: number, change: PendingChange) => {
+    updateProposal(index, 'discarded');
+    onDiscard?.(change);
   };
 
   const showChips = messages.length === 0 && !loading;
 
   return (
-    <>
-      {/* ── Chat window (mobile: full-screen overlay; desktop: anchored card) ── */}
-      {open && (
-        <div
-          className={[
-            // Mobile: full screen
-            'fixed inset-0 z-50 flex flex-col bg-white',
-            // Desktop: card anchored bottom-left
-            'md:inset-auto md:bottom-[calc(1.5rem+3.5rem)] md:left-6',
-            'md:w-[480px] md:max-h-[80vh] md:rounded-2xl md:shadow-xl',
-          ].join(' ')}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-muted/10 flex-shrink-0">
-            <div className="flex items-center gap-2.5">
-              <h3 className="font-serif text-warm-black text-[17px] leading-none">
-                Site Editor
-              </h3>
-              <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-sage" />
-                <span className="font-sans font-light text-[10px] text-sage uppercase tracking-[0.15em]">
-                  Live
-                </span>
-              </span>
-            </div>
-            <button
-              onClick={() => setOpen(false)}
-              aria-label="Close"
-              className="text-muted/40 hover:text-warm-black transition-colors duration-150 text-2xl leading-none w-8 h-8 flex items-center justify-center"
-            >
-              ×
-            </button>
-          </div>
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-muted/10 flex-shrink-0">
+        <h3 className="font-serif text-warm-black text-[17px] leading-none">AI Editor</h3>
+        <p className="font-sans font-light text-[11px] text-muted/60 mt-1">
+          Preview er umiddelbar · Deploy når du er klar
+        </p>
+      </div>
 
-          {/* Message list */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0">
-            {messages.length === 0 && !loading && (
-              <p className="font-sans font-light text-[13px] text-muted/60 text-center py-8">
-                Describe a change and I&apos;ll help you update the site.
-              </p>
-            )}
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex flex-col gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-              >
-                {msg.content && (
-                  <div
-                    className={`px-3.5 py-2.5 rounded-lg text-[14px] font-sans font-light leading-relaxed max-w-[85%] ${
-                      msg.role === 'user'
-                        ? 'bg-sage text-white'
-                        : 'bg-[#F8F6F3] text-warm-black'
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
-                )}
-                {msg.proposalState && (
-                  <div className="w-full max-w-[92%]">
-                    <ProposalCard
-                      state={msg.proposalState}
-                      onDeploy={() => handleDeploy(i)}
-                      onRefine={handleRefine}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-            {loading && <ThinkingDots />}
-            <div ref={bottomRef} />
-          </div>
+      {/* Message list */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 min-h-0">
+        {messages.length === 0 && !loading && (
+          <p className="font-sans font-light text-[13px] text-muted/50 text-center py-8">
+            Beskriv en endring, så hjelper jeg deg.
+          </p>
+        )}
 
-          {/* Starter chips */}
-          {showChips && (
-            <div className="px-4 pb-2 flex flex-wrap gap-1.5 flex-shrink-0">
-              {STARTER_CHIPS.map((chip) => (
-                <button
-                  key={chip}
-                  onClick={() => sendMessage(chip)}
-                  className="font-sans font-light text-[11px] text-sage bg-sage/10 rounded-full px-3 py-1.5 hover:bg-sage/20 transition-colors duration-150"
+        {messages.map((msg, i) => {
+          if (msg.type === 'chat') {
+            return (
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`px-3.5 py-2.5 rounded-lg text-[14px] font-sans font-light leading-relaxed max-w-[85%] ${
+                    msg.role === 'user' ? 'bg-sage text-white' : 'bg-[#F8F6F3] text-warm-black'
+                  }`}
                 >
-                  {chip}
-                </button>
-              ))}
+                  {msg.content}
+                </div>
+              </div>
+            );
+          }
+          // Proposal card
+          return (
+            <div key={i} className="max-w-[95%]">
+              <ProposalCard
+                change={msg.change}
+                state={msg.state}
+                onPreview={() => handlePreviewClick(i, msg.change)}
+                onApprove={() => handleApproveClick(i, msg.change)}
+                onDiscard={() => handleDiscardClick(i, msg.change)}
+              />
             </div>
-          )}
+          );
+        })}
 
-          {/* Input row */}
-          <div className="px-4 py-3 border-t border-muted/10 flex gap-2 items-end flex-shrink-0">
-            <textarea
-              ref={inputRef}
-              rows={1}
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage(input);
-                }
-              }}
-              placeholder="Describe a change..."
-              className="flex-1 font-sans font-light text-[14px] text-warm-black placeholder:text-muted/35 bg-transparent resize-none focus:outline-none leading-relaxed"
-              style={{ minHeight: '22px', maxHeight: '96px' }}
-            />
+        {loading && <ThinkingDots />}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Starter chips */}
+      {showChips && (
+        <div className="px-4 pb-2 flex flex-wrap gap-1.5 flex-shrink-0">
+          {STARTER_CHIPS.map((chip) => (
             <button
-              onClick={() => sendMessage(input)}
-              disabled={!input.trim() || loading}
-              aria-label="Send"
-              className="font-sans text-[20px] text-sage hover:text-sage/70 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150 flex-shrink-0 leading-none pb-0.5"
+              key={chip}
+              onClick={() => sendMessage(chip)}
+              className="font-sans font-light text-[11px] text-sage bg-sage/10 rounded-full px-3 py-1.5 hover:bg-sage/20 transition-colors duration-150"
             >
-              →
+              {chip}
             </button>
-          </div>
+          ))}
         </div>
       )}
 
-      {/* ── Pill (always fixed bottom-left; hidden on mobile when chat is open) ── */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className={[
-          'fixed bottom-6 left-6 z-50',
-          'flex items-center gap-2.5',
-          'bg-warm-black text-cream font-sans font-light text-[12px] tracking-wide',
-          'px-5 py-3 rounded-full shadow-lg',
-          'hover:bg-warm-black/85 transition-colors duration-200',
-          open ? 'hidden md:flex' : 'flex',
-        ].join(' ')}
-      >
-        <span className="animate-pulse text-[14px]">✦</span>
-        <span>Edit this site</span>
-      </button>
-    </>
+      {/* Input row */}
+      <div className="px-4 py-3 border-t border-muted/10 flex gap-2 items-end flex-shrink-0">
+        <textarea
+          ref={inputRef}
+          rows={1}
+          value={input}
+          onChange={handleInputChange}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage(input);
+            }
+          }}
+          placeholder="Beskriv en endring..."
+          className="flex-1 font-sans font-light text-[14px] text-warm-black placeholder:text-muted/35 bg-transparent resize-none focus:outline-none leading-relaxed"
+          style={{ minHeight: '22px', maxHeight: '96px' }}
+        />
+        <button
+          onClick={() => sendMessage(input)}
+          disabled={!input.trim() || loading}
+          aria-label="Send"
+          className="font-sans text-[20px] text-sage hover:text-sage/70 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150 flex-shrink-0 leading-none pb-0.5"
+        >
+          →
+        </button>
+      </div>
+    </div>
   );
 }
