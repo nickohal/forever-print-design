@@ -3,4 +3,5 @@ export interface PendingChange {
   oldCode: string;
   newCode: string;
   description: string;
+  changeType?: 'text' | 'css-var' | 'component';
 }

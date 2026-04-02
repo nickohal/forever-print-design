@@ -24,6 +24,7 @@ export function applyTextOverride(
 ): string {
   for (const change of changes) {
     if (change.file !== componentFile) continue;
+    if (change.changeType === 'css-var' || change.changeType === 'component') continue;
     const oldStripped = stripJsx(change.oldCode);
     const newStripped = stripJsx(change.newCode);
     if (!oldStripped || !newStripped) continue;
@@ -40,10 +41,17 @@ export function applyTextOverride(
  * Extract CSS variable overrides from globals.css changes.
  * Returns a CSS string like `:root { --color-sage: #E8B4CB; }` or empty string.
  */
+/**
+ * Return all changes with changeType === 'component'.
+ */
+export function getComponentChanges(changes: PendingChange[]): PendingChange[] {
+  return changes.filter((c) => c.changeType === 'component');
+}
+
 export function extractCssOverrides(changes: PendingChange[]): string {
   const lines: string[] = [];
   for (const change of changes) {
-    if (change.file !== 'src/app/globals.css') continue;
+    if (change.changeType !== 'css-var' && change.file !== 'src/app/globals.css') continue;
     const matches = [...change.newCode.matchAll(/--([\w-]+):\s*([^;\n]+)/g)];
     for (const m of matches) {
       lines.push(`--${m[1]}: ${m[2].trim()};`);

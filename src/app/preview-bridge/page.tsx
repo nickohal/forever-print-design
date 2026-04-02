@@ -7,13 +7,17 @@ import SeoSection from '@/components/SeoSection';
 import SocialProof from '@/components/SocialProof';
 import Footer from '@/components/Footer';
 import { getPreview } from '@/lib/previewStore';
-import { applyTextOverride, extractCssOverrides } from '@/lib/applyTextOverride';
+import { applyTextOverride, extractCssOverrides, getComponentChanges } from '@/lib/applyTextOverride';
 
 export const metadata: Metadata = {
   robots: 'noindex',
 };
 
 export const dynamic = 'force-dynamic';
+
+function truncate(s: string, n: number) {
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
 
 export default async function PreviewBridge({
   searchParams,
@@ -42,6 +46,9 @@ export default async function PreviewBridge({
   // Compute CSS overrides
   const cssOverrides = extractCssOverrides(changes);
 
+  // Component-level changes that can't be rendered live
+  const componentChanges = getComponentChanges(changes);
+
   return (
     <main className="max-w-[1440px] mx-auto w-full">
       {cssOverrides && (
@@ -53,6 +60,36 @@ export default async function PreviewBridge({
       <SeoSection headingOverride={seoHeading !== 'Your brand. Your traffic. Your customers.' ? seoHeading : undefined} />
       <SocialProof />
       <Footer />
+
+      {/* Diff overlay for component-level changes */}
+      {componentChanges.length > 0 && (
+        <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 max-w-sm">
+          {componentChanges.map((change, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl shadow-xl p-4 border border-muted/15 flex flex-col gap-2"
+            >
+              <p className="font-sans font-light text-[9px] uppercase tracking-[0.2em] text-sage">
+                Forhåndsvisning
+              </p>
+              <p className="font-sans font-light text-[12px] text-warm-black leading-snug">
+                {change.description}
+              </p>
+              <div className="bg-muted/5 rounded-lg p-2.5 flex flex-col gap-1.5">
+                <p className="font-sans font-light text-[10px] text-muted line-through leading-relaxed break-words">
+                  {truncate(change.oldCode, 60)}
+                </p>
+                <p className="font-sans font-light text-[10px] text-sage leading-relaxed break-words">
+                  {truncate(change.newCode, 60)}
+                </p>
+              </div>
+              <p className="font-sans font-light text-[9px] text-muted/50">
+                Trykk &lsquo;Legg til&rsquo; for å godkjenne
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

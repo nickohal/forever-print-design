@@ -3,6 +3,24 @@ import { setPreview, getPreview } from '@/lib/previewStore';
 import type { PendingChange } from '@/lib/types';
 import crypto from 'crypto';
 
+function detectChangeType(change: PendingChange): 'text' | 'css-var' | 'component' {
+  // CSS variable changes
+  if (change.file.includes('globals.css') || change.newCode.includes('--color-')) {
+    return 'css-var';
+  }
+
+  // Text-only changes: short, no JSX tags, no className
+  const hasJsx = /<[a-zA-Z]/.test(change.oldCode) || /<[a-zA-Z]/.test(change.newCode);
+  const hasClassName = change.oldCode.includes('className') || change.newCode.includes('className');
+  const isShort = change.oldCode.length < 200 && change.newCode.length < 200;
+
+  if (!hasJsx && !hasClassName && isShort) {
+    return 'text';
+  }
+
+  return 'component';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -12,8 +30,14 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: 'changes array is required' }, { status: 400 });
     }
 
+    // Auto-detect changeType if not set
+    const enriched = changes.map((c) => ({
+      ...c,
+      changeType: c.changeType ?? detectChangeType(c),
+    }));
+
     const token = crypto.randomUUID();
-    setPreview(token, changes);
+    setPreview(token, enriched);
 
     return Response.json({ token });
   } catch (err) {
