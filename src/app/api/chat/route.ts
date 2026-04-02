@@ -33,7 +33,7 @@ function readSourceFiles(): string {
   }).join('\n\n');
 }
 
-const SYSTEM_PROMPT = `You are an AI editor for a Next.js website called "Forever Print Design" — a premium digital printables Etsy shop (wedding invitations, menus, table numbers, etc.).
+const SYSTEM_PROMPT_TEMPLATE = `You are a friendly AI editor for a Next.js website called "Forever Print Design" — a premium digital printables Etsy shop (wedding invitations, menus, table numbers, etc.) run by Emilie from Oslo.
 
 The site uses:
 - Next.js 16 App Router with TypeScript
@@ -42,62 +42,54 @@ The site uses:
 - Fonts: font-serif (Cormorant Garamond), font-sans (DM Sans)
 - Class-based dark mode via .dark class
 
-The user will describe a change to make. You must respond with a JSON object (no markdown, no explanation — raw JSON only) with exactly this shape:
+## How to behave
+
+1. Converse naturally. Ask clarifying questions if the request is vague or could go multiple ways.
+2. Always reply in the same language the user writes in — Norwegian or English.
+3. When you have gathered enough information to make a specific code change, end your message with BOTH:
+   - A friendly 1–2 sentence explanation of what you will change
+   - Immediately followed by a JSON code block in this exact format:
+
+\`\`\`json
 {
   "file": "src/components/ComponentName.tsx",
-  "oldCode": "exact string to find and replace in the file",
+  "oldCode": "exact verbatim substring to replace",
   "newCode": "the replacement string",
-  "description": "short description of the change (used as git commit message suffix)"
+  "description": "short description for the git commit"
 }
+\`\`\`
 
-Rules:
-- oldCode must be a verbatim substring of the current file content — copy it exactly
-- oldCode should be the minimal unique excerpt needed to identify the change location
-- newCode should use the same indentation and code style as the rest of the file
-- Only change one file at a time
-- Preserve all existing Tailwind classes and design patterns unless the user explicitly asks to change them
-- Do not add comments or docstrings
+4. Only include the JSON block when you are confident about the exact change. Never guess file contents — use the source files provided below.
+5. oldCode must be a verbatim substring that exists in the current file. Copy it exactly including whitespace.
+6. Keep changes minimal and targeted. Preserve existing code style, Tailwind classes, and design patterns unless explicitly asked to change them.
+7. Do not include the JSON block when just having a conversation or asking clarifying questions.
 
-Current source files:`;
+## Current source files
+
+`;
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json();
+    const body = await request.json();
+    const messages: { role: 'user' | 'assistant'; content: string }[] = body.messages;
 
-    if (!message || typeof message !== 'string') {
-      return Response.json({ error: 'message is required' }, { status: 400 });
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return Response.json({ error: 'messages array is required' }, { status: 400 });
     }
 
     const fileContents = readSourceFiles();
-    const fullSystemPrompt = `${SYSTEM_PROMPT}\n\n${fileContents}`;
+    const systemPrompt = SYSTEM_PROMPT_TEMPLATE + fileContents;
 
     const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2048,
-      system: fullSystemPrompt,
-      messages: [{ role: 'user', content: message }],
+      system: systemPrompt,
+      messages,
     });
 
-    const rawText = response.content[0].type === 'text' ? response.content[0].text : '';
+    const reply = response.content[0].type === 'text' ? response.content[0].text : '';
 
-    // Strip markdown code fences if the model wraps the JSON
-    const jsonText = rawText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
-
-    let parsed: { file: string; oldCode: string; newCode: string; description: string };
-    try {
-      parsed = JSON.parse(jsonText);
-    } catch {
-      return Response.json({ error: 'Model returned invalid JSON', raw: rawText }, { status: 500 });
-    }
-
-    const required = ['file', 'oldCode', 'newCode', 'description'];
-    for (const key of required) {
-      if (typeof parsed[key as keyof typeof parsed] !== 'string') {
-        return Response.json({ error: `Missing field: ${key}`, raw: rawText }, { status: 500 });
-      }
-    }
-
-    return Response.json(parsed);
+    return Response.json({ reply });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return Response.json({ error: message }, { status: 500 });

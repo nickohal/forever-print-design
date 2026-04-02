@@ -14,7 +14,7 @@ export default function AdminEditor() {
 
   return (
     <div className="flex flex-col w-full h-screen overflow-hidden">
-      {/* Top bar */}
+      {/* Top bar — always visible */}
       <div className="h-10 flex-shrink-0 bg-warm-black flex items-center justify-between px-4">
         <span className="font-sans font-light text-[12px] text-cream/90 tracking-wide">
           ✦ AI Site Editor &nbsp;—&nbsp; Live — changes go to GitHub
@@ -37,15 +37,15 @@ export default function AdminEditor() {
         </div>
       </div>
 
-      {/* Site iframe */}
+      {/* Site iframe — desktop only */}
       <iframe
         ref={iframeRef}
         src="/"
-        className="w-full flex-1 border-none"
+        className="hidden md:block w-full flex-1 border-none"
         title="Forever Print Design"
       />
 
-      {/* AiEditor floats on top via its own fixed positioning */}
+      {/* AiEditor — floats on desktop, full-screen on mobile */}
       <AiEditor mode="live" onDeployed={handleDeployed} />
     </div>
   );
