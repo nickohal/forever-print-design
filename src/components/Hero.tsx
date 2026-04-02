@@ -12,7 +12,7 @@ export default function Hero() {
       <div className="flex-[3] min-w-0 flex flex-col justify-center py-20 lg:py-0">
         {/* Eyebrow label */}
         <p className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-7">
-          Timeless designs for life's most beautiful moments
+          Bespoke Digital Stationery
         </p>
 
         {/* Headline */}
