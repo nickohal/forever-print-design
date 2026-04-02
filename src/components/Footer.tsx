@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="bg-cream dark:bg-dark-green border-t border-muted/15 dark:border-cream/10 transition-colors duration-300">
+    <footer className="border-t border-muted/15 dark:border-cream/10 transition-colors duration-300" style={{ backgroundColor: 'var(--color-footer-bg)' }}>
       {/* Top row */}
       <div className="px-12 lg:px-20 py-12 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6">
         {/* Left — brand */}

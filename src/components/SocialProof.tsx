@@ -7,7 +7,7 @@ const stats = [
 
 export default function SocialProof() {
   return (
-    <section className="border-t border-b border-muted/15 dark:border-cream/10 bg-cream dark:bg-dark-green px-12 lg:px-20 py-16 transition-colors duration-300">
+    <section className="border-t border-b border-muted/15 dark:border-cream/10 px-12 lg:px-20 py-16 transition-colors duration-300" style={{ backgroundColor: 'var(--color-stats-bg)' }}>
       <div className="grid grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, i) => (
           <div
@@ -16,7 +16,7 @@ export default function SocialProof() {
               i !== 0 ? "border-l border-muted/15 dark:border-cream/10" : ""
             }`}
           >
-            <span className="font-serif font-light text-warm-black dark:text-cream text-[48px] leading-none mb-3 transition-colors duration-300">
+            <span className="font-serif font-light text-warm-black dark:text-cream leading-none mb-3 transition-colors duration-300" style={{ fontSize: 'var(--size-stat-number)' }}>
               {stat.value}
             </span>
             <span className="font-sans font-light text-[10px] uppercase tracking-[0.25em] text-muted">

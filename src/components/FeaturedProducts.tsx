@@ -9,23 +9,23 @@ const products = [
 
 export default function FeaturedProducts({ headingOverride }: { headingOverride?: string } = {}) {
   return (
-    <section className="border-t border-muted/15 dark:border-cream/10 px-12 lg:px-20 py-24 lg:py-32 transition-colors duration-300">
+    <section className="section-padding border-t border-muted/15 dark:border-cream/10 px-12 lg:px-20 transition-colors duration-300" style={{ backgroundColor: 'var(--color-section-bg)' }}>
       {/* Section heading */}
       <div className="mb-14">
         <p className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-4">
           Featured Collection
         </p>
-        <h2 data-preview-id="featured-heading" className="font-serif font-light italic text-warm-black dark:text-cream text-5xl leading-[1.15] transition-colors duration-300">
+        <h2 data-preview-id="featured-heading" className="font-serif font-light italic text-warm-black dark:text-cream leading-[1.15] transition-colors duration-300" style={{ fontSize: 'var(--size-section-heading)' }}>
           {headingOverride ?? 'Crafted for every occasion'}
         </h2>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3" style={{ gap: 'var(--spacing-card-gap)' }}>
         {products.map((product) => (
           <div key={product.id} className="group flex flex-col">
             {/* Image placeholder */}
-            <div className="relative aspect-[3/4] bg-[#F3F0EB] dark:bg-[#1F4B38] border border-muted/15 dark:border-cream/10 mb-4 flex items-center justify-center overflow-hidden transition-colors duration-300">
+            <div className="card-placeholder relative aspect-[3/4] mb-4 flex items-center justify-center overflow-hidden transition-colors duration-300">
               {/* Inner frame */}
               <div className="absolute inset-3 border border-muted/15 dark:border-cream/10 pointer-events-none" />
 
@@ -42,7 +42,7 @@ export default function FeaturedProducts({ headingOverride }: { headingOverride?
             </div>
 
             {/* Card copy */}
-            <h3 className="font-serif font-light text-warm-black dark:text-cream text-[18px] leading-snug mb-1 transition-colors duration-300">
+            <h3 className="font-serif font-light text-warm-black dark:text-cream leading-snug mb-1 transition-colors duration-300" style={{ fontSize: 'var(--size-card-title)' }}>
               {product.title}
             </h3>
             <p className="font-sans font-light text-[11px] text-muted tracking-wide mb-3">

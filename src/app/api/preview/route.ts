@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 function detectChangeType(change: PendingChange): 'text' | 'css-var' | 'component' {
   // CSS variable changes
-  if (change.file.includes('globals.css') || change.newCode.includes('--color-')) {
+  if (change.file.includes('globals.css') || /--(?:color|size|spacing|opacity|radius)-/.test(change.newCode)) {
     return 'css-var';
   }
 

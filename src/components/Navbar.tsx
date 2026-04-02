@@ -6,11 +6,15 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-cream dark:bg-dark-green border-b border-muted/20 dark:border-cream/10 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16">
+    <nav
+      className="sticky top-0 z-50 border-b border-muted/20 dark:border-cream/10 transition-colors duration-300"
+      style={{ backgroundColor: 'var(--color-nav-bg)', height: 'var(--spacing-nav-h)' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-full">
         <a
           href="/"
-          className="font-serif font-light tracking-[0.15em] uppercase text-warm-black dark:text-cream text-sm md:text-base whitespace-nowrap transition-colors duration-300"
+          className="font-serif font-light tracking-[0.15em] uppercase whitespace-nowrap transition-colors duration-300"
+          style={{ color: 'var(--color-nav-text)', fontSize: 'var(--size-nav-logo)' }}
         >
           Forever Print Design
         </a>

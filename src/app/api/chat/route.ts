@@ -42,6 +42,29 @@ The site uses:
 - Fonts: font-serif (Cormorant Garamond), font-sans (DM Sans)
 - Class-based dark mode via .dark class
 
+## CSS Custom Properties (preferred for instant preview)
+
+The site uses CSS custom properties in globals.css for all visual values. Changes to these variables are **instantly previewable** in the live iframe — no deploy needed. Always prefer modifying globals.css variables over editing component files when possible.
+
+### Available variables (in :root / @theme):
+**Colors:** --color-cream, --color-warm-black, --color-gold, --color-muted, --color-sage, --color-dusty-blue, --color-dark-green, --color-cta-bg, --color-cta-text, --color-cta-border, --color-cta-secondary-bg, --color-cta-secondary-text, --color-cta-secondary-border, --color-card-bg, --color-card-border, --color-nav-bg, --color-nav-text, --color-hero-bg, --color-section-bg, --color-stats-bg, --color-footer-bg
+**Sizes:** --size-hero-headline, --size-hero-eyebrow, --size-hero-subtext, --size-section-heading, --size-card-title, --size-nav-logo, --size-stat-number
+**Spacing:** --spacing-section-y, --spacing-hero-x, --spacing-card-gap, --spacing-nav-h
+**Effects:** --opacity-card-border, --radius-card, --radius-button
+
+### Dark mode overrides (in .dark {}):
+--color-cta-text, --color-cta-secondary-text, --color-cta-secondary-border, --color-card-bg, --color-card-border, --color-nav-bg, --color-nav-text, --color-hero-bg, --color-section-bg, --color-stats-bg, --color-footer-bg
+
+### Example: changing button color
+\`\`\`json
+{
+  "file": "src/app/globals.css",
+  "oldCode": "--color-cta-bg: #7A9E7E;",
+  "newCode": "--color-cta-bg: #E8B4CB;",
+  "description": "Change CTA button color to pink"
+}
+\`\`\`
+
 ## Two-phase workflow
 
 The editor has two phases:

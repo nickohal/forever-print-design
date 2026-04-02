@@ -14,16 +14,19 @@ const placeholders = [
 
 export default function Hero({ overrides }: { overrides?: HeroOverrides } = {}) {
   return (
-    <section className="w-full min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] flex flex-col lg:flex-row items-center overflow-hidden px-12 lg:px-20 gap-8 lg:gap-12">
+    <section
+      className="w-full min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] flex flex-col lg:flex-row items-center overflow-hidden px-12 lg:px-20 gap-8 lg:gap-12"
+      style={{ backgroundColor: 'var(--color-hero-bg)' }}
+    >
       {/* Left — copy */}
       <div className="flex-[3] min-w-0 flex flex-col justify-center py-20 lg:py-0">
         {/* Eyebrow label */}
-        <p data-preview-id="hero-eyebrow" className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-7">
+        <p data-preview-id="hero-eyebrow" className="font-sans font-light uppercase tracking-[0.3em] text-muted mb-7" style={{ fontSize: 'var(--size-hero-eyebrow)' }}>
           {overrides?.eyebrow ?? 'Bespoke Digital Stationery'}
         </p>
 
         {/* Headline */}
-        <h1 data-preview-id="hero-headline" className="font-serif font-light italic text-warm-black dark:text-cream text-6xl md:text-7xl lg:text-8xl leading-[1.08] mb-8 max-w-lg transition-colors duration-300">
+        <h1 data-preview-id="hero-headline" className="font-serif font-light italic text-warm-black dark:text-cream leading-[1.08] mb-8 max-w-lg transition-colors duration-300" style={{ fontSize: 'var(--size-hero-headline)' }}>
           {overrides?.headline ?? 'Designed for your most cherished moments'}
         </h1>
 
@@ -31,7 +34,7 @@ export default function Hero({ overrides }: { overrides?: HeroOverrides } = {}) 
         <div className="w-12 h-px bg-sage mb-8" />
 
         {/* Body copy */}
-        <p data-preview-id="hero-subtext" className="font-sans font-light text-muted text-[15px] md:text-base leading-[1.8] mb-10 max-w-sm">
+        <p data-preview-id="hero-subtext" className="font-sans font-light text-muted leading-[1.8] mb-10 max-w-sm" style={{ fontSize: 'var(--size-hero-subtext)' }}>
           {overrides?.subtext ?? 'Premium printable templates for weddings, celebrations & every occasion in between.'}
         </p>
 
@@ -39,13 +42,13 @@ export default function Hero({ overrides }: { overrides?: HeroOverrides } = {}) 
         <div className="flex flex-row gap-3">
           <a
             href="#"
-            className="font-sans font-light text-[11px] uppercase tracking-[0.18em] bg-sage text-cream dark:text-warm-black px-5 py-3 md:px-8 md:py-3.5 hover:bg-sage/85 transition-colors duration-200 whitespace-nowrap"
+            className="btn-primary font-sans font-light text-[11px] uppercase tracking-[0.18em] px-5 py-3 md:px-8 md:py-3.5 hover:opacity-85 transition-colors duration-200 whitespace-nowrap"
           >
             <span data-preview-id="hero-cta-primary">{overrides?.ctaPrimary ?? 'Shop Collection'}</span>
           </a>
           <a
             href="#"
-            className="font-sans font-light text-[11px] uppercase tracking-[0.18em] border border-warm-black/30 dark:border-cream/30 text-warm-black dark:text-cream px-5 py-3 md:px-8 md:py-3.5 hover:border-warm-black/60 dark:hover:border-cream/60 transition-colors duration-200 whitespace-nowrap"
+            className="btn-secondary font-sans font-light text-[11px] uppercase tracking-[0.18em] px-5 py-3 md:px-8 md:py-3.5 hover:opacity-80 transition-colors duration-200 whitespace-nowrap"
           >
             View on Etsy
           </a>
@@ -63,7 +66,7 @@ export default function Hero({ overrides }: { overrides?: HeroOverrides } = {}) 
           {placeholders.map(({ label }) => (
             <div
               key={label}
-              className="group relative aspect-[3/4] border border-muted/15 dark:border-cream/10 bg-[#F3F0EB] dark:bg-[#1F4B38] flex flex-col items-center justify-between p-4 hover:border-gold/30 transition-colors duration-300"
+              className="card-placeholder group relative aspect-[3/4] flex flex-col items-center justify-between p-4 hover:border-gold/30 transition-colors duration-300"
             >
               {/* Inner frame */}
               <div className="absolute inset-3 border border-muted/20 dark:border-cream/10 pointer-events-none" />

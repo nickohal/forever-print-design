@@ -6,7 +6,7 @@ const bullets = [
 
 export default function SeoSection({ headingOverride }: { headingOverride?: string } = {}) {
   return (
-    <section className="border-t border-muted/15 dark:border-cream/10 px-12 lg:px-20 py-24 transition-colors duration-300">
+    <section className="section-padding border-t border-muted/15 dark:border-cream/10 px-12 lg:px-20 transition-colors duration-300" style={{ backgroundColor: 'var(--color-section-bg)' }}>
       <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-center">
 
         {/* Left — prose */}
@@ -14,7 +14,7 @@ export default function SeoSection({ headingOverride }: { headingOverride?: stri
           <p className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-5">
             Own your presence online
           </p>
-          <h2 data-preview-id="seo-heading" className="font-serif font-light text-warm-black dark:text-cream text-[40px] leading-[1.1] mb-6 transition-colors duration-300">
+          <h2 data-preview-id="seo-heading" className="font-serif font-light text-warm-black dark:text-cream leading-[1.1] mb-6 transition-colors duration-300" style={{ fontSize: 'var(--size-section-heading)' }}>
             {headingOverride ?? 'Your brand. Your traffic. Your customers.'}
           </h2>
           <p className="font-sans font-light text-muted text-[14px] leading-relaxed mb-8 max-w-md">

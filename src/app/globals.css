@@ -10,9 +10,90 @@
   --color-sage: #7A9E7E;
   --color-dusty-blue: #8BA7B8;
   --color-dark-green: #1A3828;
+
+  /* Component colors */
+  --color-cta-bg: #7A9E7E;
+  --color-cta-text: #FDFAF6;
+  --color-cta-border: #7A9E7E;
+  --color-cta-secondary-bg: transparent;
+  --color-cta-secondary-text: #1A1917;
+  --color-cta-secondary-border: #1A1917;
+  --color-card-bg: #F3F0EB;
+  --color-nav-bg: #FDFAF6;
+  --color-nav-text: #1A1917;
+  --color-hero-bg: #FDFAF6;
+  --color-section-bg: #FDFAF6;
+  --color-stats-bg: #FDFAF6;
+  --color-footer-bg: #FDFAF6;
+
   --font-serif: var(--font-serif);
   --font-sans: var(--font-sans);
   --font-script: var(--font-script);
+}
+
+:root {
+  /* Card border (rgba, outside @theme) */
+  --color-card-border: rgba(140, 136, 128, 0.15);
+
+  /* Typography sizes */
+  --size-hero-headline: 4.25rem;
+  --size-hero-eyebrow: 0.6875rem;
+  --size-hero-subtext: 0.9375rem;
+  --size-section-heading: 3rem;
+  --size-card-title: 1.125rem;
+  --size-nav-logo: 0.875rem;
+  --size-stat-number: 3rem;
+
+  /* Spacing */
+  --spacing-section-y: 6rem;
+  --spacing-hero-x: 3rem;
+  --spacing-card-gap: 1.5rem;
+  --spacing-nav-h: 4rem;
+
+  /* Effects */
+  --opacity-card-border: 0.15;
+  --radius-card: 0px;
+  --radius-button: 0px;
+}
+
+/* Dark mode variable overrides */
+.dark {
+  --color-cta-text: #1A1917;
+  --color-cta-secondary-text: #FDFAF6;
+  --color-cta-secondary-border: rgba(253, 250, 246, 0.3);
+  --color-card-bg: #1F4B38;
+  --color-card-border: rgba(253, 250, 246, 0.1);
+  --color-nav-bg: #1A3828;
+  --color-nav-text: #FDFAF6;
+  --color-hero-bg: #1A3828;
+  --color-section-bg: #1A3828;
+  --color-stats-bg: #1A3828;
+  --color-footer-bg: #1A3828;
+}
+
+/* Utility classes */
+.btn-primary {
+  background-color: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  border-radius: var(--radius-button);
+}
+
+.btn-secondary {
+  background-color: var(--color-cta-secondary-bg);
+  color: var(--color-cta-secondary-text);
+  border: 1px solid var(--color-cta-secondary-border);
+  border-radius: var(--radius-button);
+}
+
+.card-placeholder {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-card);
+}
+
+.section-padding {
+  padding-top: var(--spacing-section-y);
+  padding-bottom: var(--spacing-section-y);
 }
 
 body {

@@ -52,6 +52,7 @@ export function extractCssOverrides(changes: PendingChange[]): string {
   const lines: string[] = [];
   for (const change of changes) {
     if (change.changeType !== 'css-var' && change.file !== 'src/app/globals.css') continue;
+    if (change.changeType === 'component') continue;
     const matches = [...change.newCode.matchAll(/--([\w-]+):\s*([^;\n]+)/g)];
     for (const m of matches) {
       lines.push(`--${m[1]}: ${m[2].trim()};`);
