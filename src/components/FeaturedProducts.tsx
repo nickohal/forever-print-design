@@ -7,7 +7,7 @@ const products = [
   { id: 6, title: "Seating Chart Template", category: "Seating Charts", price: "from kr 120", tag: null, etsy: "https://www.etsy.com/no-en/shop/ForeverPrintDesign" },
 ];
 
-export default function FeaturedProducts() {
+export default function FeaturedProducts({ headingOverride }: { headingOverride?: string } = {}) {
   return (
     <section className="border-t border-muted/15 dark:border-cream/10 px-12 lg:px-20 py-24 lg:py-32 transition-colors duration-300">
       {/* Section heading */}
@@ -16,7 +16,7 @@ export default function FeaturedProducts() {
           Featured Collection
         </p>
         <h2 data-preview-id="featured-heading" className="font-serif font-light italic text-warm-black dark:text-cream text-5xl leading-[1.15] transition-colors duration-300">
-          Crafted for every occasion
+          {headingOverride ?? 'Crafted for every occasion'}
         </h2>
       </div>
 

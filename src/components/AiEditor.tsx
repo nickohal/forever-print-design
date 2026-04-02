@@ -1,14 +1,8 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import type { PendingChange } from '@/lib/types';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface PendingChange {
-  file: string;
-  oldCode: string;
-  newCode: string;
-  description: string;
-}
+export type { PendingChange };
 
 type ProposalState = 'pending' | 'previewed' | 'approved' | 'discarded';
 

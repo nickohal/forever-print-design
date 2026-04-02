@@ -1,63 +1,64 @@
 'use client';
 import { useRef, useCallback, useState } from 'react';
 import AiEditor from '@/components/AiEditor';
-import type { PendingChange } from '@/components/AiEditor';
+import type { PendingChange } from '@/lib/types';
 import { logout } from './actions';
-
-function stripJsx(s: string) {
-  return s
-    .replace(/<[^>]*>/g, '')
-    .replace(/\{[^}]*\}/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&ensp;/g, ' ')
-    .replace(/&ldquo;/g, '\u201c')
-    .replace(/&rdquo;/g, '\u201d')
-    .trim();
-}
 
 export default function AdminEditor() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
+  const [previewedChanges, setPreviewedChanges] = useState<PendingChange[]>([]);
   const [publishing, setPublishing] = useState(false);
   const [publishProgress, setPublishProgress] = useState({ current: 0, total: 0 });
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishDone, setPublishDone] = useState(false);
 
-  const sendToIframe = useCallback((message: Record<string, unknown>) => {
-    iframeRef.current?.contentWindow?.postMessage(message, '*');
+  const refreshIframeWithChanges = useCallback(async (changes: PendingChange[]) => {
+    if (!iframeRef.current) return;
+    if (changes.length === 0) {
+      iframeRef.current.src = '/preview-bridge';
+      return;
+    }
+    try {
+      const res = await fetch('/api/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ changes }),
+      });
+      if (!res.ok) return;
+      const { token } = await res.json();
+      iframeRef.current.src = `/preview-bridge?token=${token}`;
+    } catch {
+      // Silently fail — preview is best-effort
+    }
   }, []);
 
   const handlePreview = useCallback(
     (change: PendingChange) => {
-      if (change.file === 'src/app/globals.css') {
-        const matches = [...change.newCode.matchAll(/--(color-[\w-]+):\s*([^;\n]+)/g)];
-        if (matches.length > 0) {
-          const css = `:root { ${matches.map((m) => `--${m[1]}: ${m[2].trim()}`).join('; ')}; }`;
-          sendToIframe({ type: 'preview-css', css });
-        }
-        return;
-      }
-      const oldText = stripJsx(change.oldCode);
-      const newText = stripJsx(change.newCode);
-      if (oldText && newText) {
-        sendToIframe({ type: 'preview-text', oldText, newText });
-      }
+      const next = [...previewedChanges, change];
+      setPreviewedChanges(next);
+      refreshIframeWithChanges(next);
     },
-    [sendToIframe],
+    [previewedChanges, refreshIframeWithChanges],
   );
 
   const handleApprove = useCallback((change: PendingChange) => {
     setPendingChanges((prev) => [...prev, change]);
   }, []);
 
-  const handleDiscard = useCallback((change: PendingChange) => {
-    setPendingChanges((prev) =>
-      prev.filter(
+  const handleDiscard = useCallback(
+    (change: PendingChange) => {
+      setPendingChanges((prev) =>
+        prev.filter((c) => !(c.file === change.file && c.oldCode === change.oldCode)),
+      );
+      const nextPreviewed = previewedChanges.filter(
         (c) => !(c.file === change.file && c.oldCode === change.oldCode),
-      ),
-    );
-  }, []);
+      );
+      setPreviewedChanges(nextPreviewed);
+      refreshIframeWithChanges(nextPreviewed);
+    },
+    [previewedChanges, refreshIframeWithChanges],
+  );
 
   const handlePublish = async () => {
     if (pendingChanges.length === 0 || publishing) return;
@@ -89,14 +90,14 @@ export default function AdminEditor() {
     }
 
     setPendingChanges([]);
+    setPreviewedChanges([]);
     setPublishing(false);
     setPublishDone(true);
 
-    // Reset preview and reload iframe after a short delay
-    sendToIframe({ type: 'preview-reset' });
+    // Reload iframe to show actual deployed state
     setTimeout(() => {
       if (iframeRef.current) {
-        iframeRef.current.src = iframeRef.current.src;
+        iframeRef.current.src = '/preview-bridge';
       }
       setTimeout(() => setPublishDone(false), 3000);
     }, 500);
@@ -118,7 +119,7 @@ export default function AdminEditor() {
           <button
             onClick={handlePublish}
             disabled={pendingCount === 0 || publishing}
-            className="font-sans font-light text-[11px] text-warm-black bg-sage text-cream px-4 py-1.5 rounded-md hover:bg-sage/85 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150 flex items-center gap-2"
+            className="font-sans font-light text-[11px] text-cream bg-sage px-4 py-1.5 rounded-md hover:bg-sage/85 disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150 flex items-center gap-2"
           >
             {publishing
               ? `Publiserer ${publishProgress.current}/${publishProgress.total}...`

@@ -1,3 +1,10 @@
+export interface HeroOverrides {
+  eyebrow?: string;
+  headline?: string;
+  subtext?: string;
+  ctaPrimary?: string;
+}
+
 const placeholders = [
   { label: "Wedding Invitations" },
   { label: "Dinner Menus" },
@@ -5,19 +12,19 @@ const placeholders = [
   { label: "Bar Signs" },
 ];
 
-export default function Hero() {
+export default function Hero({ overrides }: { overrides?: HeroOverrides } = {}) {
   return (
     <section className="w-full min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] flex flex-col lg:flex-row items-center overflow-hidden px-12 lg:px-20 gap-8 lg:gap-12">
       {/* Left — copy */}
       <div className="flex-[3] min-w-0 flex flex-col justify-center py-20 lg:py-0">
         {/* Eyebrow label */}
         <p data-preview-id="hero-eyebrow" className="font-sans font-light text-[11px] uppercase tracking-[0.3em] text-muted mb-7">
-          Bespoke Digital Stationery
+          {overrides?.eyebrow ?? 'Bespoke Digital Stationery'}
         </p>
 
         {/* Headline */}
         <h1 data-preview-id="hero-headline" className="font-serif font-light italic text-warm-black dark:text-cream text-6xl md:text-7xl lg:text-8xl leading-[1.08] mb-8 max-w-lg transition-colors duration-300">
-          Designed for your most cherished moments
+          {overrides?.headline ?? 'Designed for your most cherished moments'}
         </h1>
 
         {/* Sage rule */}
@@ -25,8 +32,7 @@ export default function Hero() {
 
         {/* Body copy */}
         <p data-preview-id="hero-subtext" className="font-sans font-light text-muted text-[15px] md:text-base leading-[1.8] mb-10 max-w-sm">
-          Premium printable templates for weddings, celebrations &amp; every
-          occasion in between.
+          {overrides?.subtext ?? 'Premium printable templates for weddings, celebrations & every occasion in between.'}
         </p>
 
         {/* CTAs */}
@@ -35,7 +41,7 @@ export default function Hero() {
             href="#"
             className="font-sans font-light text-[11px] uppercase tracking-[0.18em] bg-sage text-cream dark:text-warm-black px-5 py-3 md:px-8 md:py-3.5 hover:bg-sage/85 transition-colors duration-200 whitespace-nowrap"
           >
-            <span data-preview-id="hero-cta-primary">Shop Collection</span>
+            <span data-preview-id="hero-cta-primary">{overrides?.ctaPrimary ?? 'Shop Collection'}</span>
           </a>
           <a
             href="#"

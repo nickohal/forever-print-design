@@ -4,7 +4,7 @@ const bullets = [
   "Blog & journal ready — content that drives organic traffic",
 ];
 
-export default function SeoSection() {
+export default function SeoSection({ headingOverride }: { headingOverride?: string } = {}) {
   return (
     <section className="border-t border-muted/15 dark:border-cream/10 px-12 lg:px-20 py-24 transition-colors duration-300">
       <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-center">
@@ -15,7 +15,7 @@ export default function SeoSection() {
             Own your presence online
           </p>
           <h2 data-preview-id="seo-heading" className="font-serif font-light text-warm-black dark:text-cream text-[40px] leading-[1.1] mb-6 transition-colors duration-300">
-            Your brand. Your traffic. Your customers.
+            {headingOverride ?? 'Your brand. Your traffic. Your customers.'}
           </h2>
           <p className="font-sans font-light text-muted text-[14px] leading-relaxed mb-8 max-w-md">
             Etsy is a great platform — but every visitor stays on Etsy. A
