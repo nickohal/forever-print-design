@@ -1,13 +1,13 @@
 'use client';
 import { useRef, useCallback } from 'react';
 import AiEditor from '@/components/AiEditor';
+import { logout } from './actions';
 
 export default function AdminEditor() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const handleDeployed = useCallback(() => {
     if (iframeRef.current) {
-      // Reassigning src forces a reload
       iframeRef.current.src = iframeRef.current.src;
     }
   }, []);
@@ -19,12 +19,22 @@ export default function AdminEditor() {
         <span className="font-sans font-light text-[12px] text-cream/90 tracking-wide">
           ✦ AI Site Editor &nbsp;—&nbsp; Live — changes go to GitHub
         </span>
-        <a
-          href="/"
-          className="font-sans font-light text-[11px] text-cream/60 hover:text-cream transition-colors duration-150"
-        >
-          ← Back to site
-        </a>
+        <div className="flex items-center gap-4">
+          <a
+            href="/"
+            className="font-sans font-light text-[11px] text-cream/60 hover:text-cream transition-colors duration-150"
+          >
+            ← Back to site
+          </a>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="font-sans font-light text-[11px] text-cream/60 hover:text-cream transition-colors duration-150"
+            >
+              Log out
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* Site iframe */}

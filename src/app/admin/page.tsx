@@ -7,9 +7,11 @@ async function login(formData: FormData) {
   const password = formData.get('password');
   if (password === process.env.ADMIN_PASSWORD) {
     const cookieStore = await cookies();
-    cookieStore.set('admin_auth', '1', {
+    cookieStore.set('admin_auth', 'true', {
       httpOnly: true,
       sameSite: 'lax',
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 8, // 8 hours
     });
     redirect('/admin');
@@ -24,7 +26,7 @@ export default async function AdminPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const cookieStore = await cookies();
-  const isAuth = cookieStore.get('admin_auth')?.value === '1';
+  const isAuth = cookieStore.get('admin_auth')?.value === 'true';
 
   if (isAuth) {
     return <AdminEditor />;
@@ -35,35 +37,29 @@ export default async function AdminPage({
 
   return (
     <main className="min-h-screen bg-cream flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <h1 className="font-serif font-light text-warm-black text-[32px] leading-snug mb-2">
+      <div className="w-full max-w-xs flex flex-col items-center text-center">
+        {/* Brand */}
+        <p className="font-serif font-light tracking-[0.2em] uppercase text-warm-black text-sm mb-1">
+          Forever Print Design
+        </p>
+        <h1 className="font-serif font-light text-warm-black text-[28px] leading-snug mb-8">
           Site Editor
         </h1>
-        <p className="font-sans font-light text-[13px] text-muted mb-8">
-          Enter your admin password to continue.
-        </p>
 
-        <form action={login} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="password"
-              className="font-sans font-light text-[11px] uppercase tracking-[0.18em] text-muted"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="font-sans font-light text-[14px] text-warm-black bg-white border border-muted/25 focus:border-sage focus:outline-none rounded-lg px-4 py-3 transition-colors duration-150"
-            />
-          </div>
+        <form action={login} className="w-full flex flex-col gap-3">
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Password"
+            required
+            className="w-full font-sans font-light text-[14px] text-warm-black placeholder:text-muted/40 bg-white border border-muted/25 focus:border-sage focus:outline-none rounded-lg px-4 py-3 text-center transition-colors duration-150"
+          />
 
           {hasError && (
             <p className="font-sans font-light text-[12px] text-red-500">
-              Incorrect password. Try again.
+              Incorrect password.
             </p>
           )}
 
@@ -71,7 +67,7 @@ export default async function AdminPage({
             type="submit"
             className="font-sans font-light text-[12px] uppercase tracking-[0.18em] text-white bg-sage rounded-lg px-4 py-3 hover:bg-sage/85 transition-colors duration-150"
           >
-            Sign in →
+            Enter
           </button>
         </form>
       </div>
